@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [vue()],
   server:{
     host: true,
-    port: 5173,
+    port: 5175,
     allowedHosts: [
       'diffident-dormant-jeramy.ngrok-free.dev'
     ]
