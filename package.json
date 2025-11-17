@@ -1,0 +1,38 @@
+{
+  "name": "front-visitor",
+  "private": true,
+  "version": "1.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy:production": "scp -r -P 3322 dist/* root@141.11.159.83:/var/www/visitor.zoftdd.com"
+  },
+  "dependencies": {
+    "@fawmi/vue-google-maps": "^0.9.79",
+    "axios": "^1.9.0",
+    "daisyui": "^4.12.24",
+    "flatpickr": "^4.6.13",
+    "jwt-decode": "^4.0.0",
+    "lodash": "^4.17.21",
+    "lucide-vue-next": "^0.511.0",
+    "pinia": "^3.0.2",
+    "qs": "^6.14.0",
+    "socket.io-client": "^4.8.1",
+    "sweetalert2": "^11.26.3",
+    "vue": "^3.5.13",
+    "vue-datepicker-next": "^1.0.3",
+    "vue-flatpickr-component": "^12.0.0",
+    "vue-router": "^4.0.13",
+    "vue-signature-pad": "^3.0.2",
+    "vue-sweetalert2": "^5.0.11"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.3",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17",
+    "vite": "^6.3.5"
+  }
+}
