@@ -1,15 +1,10 @@
 <template>
     <div class="max-w-7xl mx-auto">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6">บันทึกเวลาเข้า-ออก</h1>
-
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-white rounded-lg shadow p-4">
-                <h2 class="text-lg font-semibold text-gray-700 mb-4">ปฏิทิน</h2>
-                <Calendar 
-                    @date-selected="handleDateSelected"
-                    @month-changed="handleMonthChanged"
-                    :attendanceMap="attendanceMap"
-                />
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">บันทึกเวลาเข้า-ออก</h2>
+                <Calendar @date-selected="handleDateSelected" @month-changed="handleMonthChanged"
+                    :attendanceMap="attendanceMap" />
             </div>
 
             <div class="bg-white rounded-lg shadow p-4">
@@ -22,12 +17,8 @@
                         (เดือน {{ currentMonthName }})
                     </span>
                 </h2>
-                <Table 
-                    :selectedDate="selectedDate" 
-                    :currentMonth="currentMonth" 
-                    :records="records"
-                    @show-detail="handleShowDetail" 
-                />
+                <Table :selectedDate="selectedDate" :currentMonth="currentMonth" :records="records"
+                    @show-detail="handleShowDetail" />
             </div>
         </div>
 

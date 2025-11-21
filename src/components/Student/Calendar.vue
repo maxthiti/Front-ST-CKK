@@ -25,12 +25,8 @@
         </div>
 
         <div class="grid grid-cols-7 gap-1">
-            <button
-                v-for="(day, index) in calendarDays"
-                :key="index"
-                @click="selectDate(day)"
-                :disabled="!day.currentMonth"
-                :class="[
+            <button v-for="(day, index) in calendarDays" :key="index" @click="selectDate(day)"
+                :disabled="!day.currentMonth" :class="[
                     'aspect-square flex items-center justify-center rounded-lg text-sm transition-colors',
                     day.currentMonth ? 'hover:bg-blue-50' : 'text-gray-300 cursor-not-allowed',
                     day.isSelected
@@ -43,8 +39,7 @@
                                     ? 'bg-blue-100 text-blue-700 font-semibold'
                                     : 'text-gray-700',
                     !day.currentMonth && 'opacity-50'
-                ]"
-            >
+                ]">
                 {{ day.date }}
             </button>
         </div>
@@ -55,7 +50,6 @@
 import { ref, computed, watch } from 'vue';
 
 const props = defineProps({
-    // Map of ISO date (YYYY-MM-DD) -> 'present' | 'absent'
     attendanceMap: {
         type: Object,
         default: () => ({})
