@@ -161,7 +161,6 @@ const nextMonth = () => {
 };
 
 watch(currentDate, () => {
-    // keep in sync if needed
 });
 </script>
 

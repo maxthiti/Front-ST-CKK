@@ -37,7 +37,6 @@ const currentMonth = ref(new Date());
 const showDetail = ref(false);
 const selectedRecord = ref(null);
 
-// Mock attendance records (replace with API call later)
 const records = ref([
     {
         id: 1,
@@ -98,24 +97,21 @@ const formatDate = (date) => {
     return `${day}/${month}/${year}`;
 };
 
-// Build attendance map for the current month
 const attendanceMap = computed(() => {
     const map = {};
     const year = currentMonth.value.getFullYear();
     const month = currentMonth.value.getMonth();
 
-    // Records in this month
     const monthRecords = records.value.filter(r => r.date.getFullYear() === year && r.date.getMonth() === month);
     const presentSet = new Set(monthRecords.map(r => r.date.toISOString().slice(0, 10)));
 
-    // Iterate days in current month, mark present/absent only for past or today
     const today = new Date();
     const lastDay = new Date(year, month + 1, 0).getDate();
     for (let d = 1; d <= lastDay; d++) {
         const dateObj = new Date(year, month, d);
         const iso = dateObj.toISOString().slice(0, 10);
         const isFuture = dateObj > new Date(today.getFullYear(), today.getMonth(), today.getDate());
-        if (isFuture) continue; // don't mark future days
+        if (isFuture) continue;
         map[iso] = presentSet.has(iso) ? 'present' : 'absent';
     }
     return map;
