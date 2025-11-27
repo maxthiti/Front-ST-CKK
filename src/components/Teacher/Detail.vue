@@ -30,6 +30,7 @@
       </div>
 
       <div class="p-6 space-y-6">
+        <!-- วันที่อย่างเดียว -->
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-500">วันที่</p>
@@ -39,6 +40,7 @@
           </div>
         </div>
 
+        <!-- รูป -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <p class="text-sm font-medium text-gray-700 mb-2">รูปต้นฉบับ</p>
@@ -79,6 +81,7 @@
           </div>
         </div>
 
+        <!-- เวลาสแกน (แทน เวลาเข้า/เวลาออก/รอเช็คเอาท์ ทั้งหมด) -->
         <div class="bg-blue-50 rounded-lg p-4">
           <div class="flex items-center gap-2 mb-2">
             <svg

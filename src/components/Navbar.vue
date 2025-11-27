@@ -10,10 +10,21 @@
 
         <div class="flex items-center gap-3">
             <div class="flex items-center gap-2">
-                <div
-                    class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
-                    {{ userInitial }}
-                </div>
+               <div class="w-8 h-8">
+    <img
+        v-if="userImage"
+        :src="userImage"
+        class="w-8 h-8 rounded-full object-cover"
+        alt="User"
+    />
+
+    <div
+        v-else
+        class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+        {{ userInitial }}
+    </div>
+</div>
+
                 <div class="text-right">
                     <p class="text-sm font-medium text-gray-700">{{ userName }}</p>
                     <p class="text-xs text-gray-500">{{ userRole }}</p>
@@ -38,18 +49,37 @@ const router = useRouter();
 const authStore = useAuthStore();
 
 const userName = computed(() => authStore.user?.name || 'ผู้ใช้งาน');
-const userRole = computed(() => authStore.user?.role === 'student' ? 'นักเรียน' : 'ครู');
+const userRole = computed(() => authStore.user?.role === 'student' ? 'นักเรียน' : 'อาจารย์');
+
 const userInitial = computed(() => {
     const name = authStore.user?.name || 'U';
     return name.charAt(0).toUpperCase();
 });
+const FILE_BASE_URL_FILES = import.meta.env.VITE_APP_FILE_BASE_URL_FILES;
+
+const buildUrl = (base, path) => {
+    if (!path) return null;
+    if (path.startsWith("http")) return path;
+
+    const clean = path.startsWith("/") ? path.slice(1) : path;
+    return base.replace(/\/$/, "") + "/" + clean;
+};
+
+const userImage = computed(() => {
+    const pic = authStore.user?.picture;
+    if (!pic) return null;
+
+    return buildUrl(FILE_BASE_URL_FILES, pic);
+});
+
 
 const toggleMobileSidebar = () => {
     window.dispatchEvent(new CustomEvent('toggle-sidebar'));
 };
 
 const logout = () => {
-    authStore.logout();
+    authStore.logout();   
     router.push('/login');
 };
+
 </script>

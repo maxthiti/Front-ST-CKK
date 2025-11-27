@@ -4,6 +4,7 @@ import Login from "../views/Login.vue";
 import StudentLayout from "../layouts/StudentLayout.vue";
 import TeacherLayout from "../layouts/TeacherLayout.vue";
 import StudentHome from "../views/Student/Home.vue";
+import ChangePassword from "../views/Resetpassword/Reset.vue";
 
 const routes = [
   {
@@ -15,6 +16,12 @@ const routes = [
     name: "Login",
     component: Login,
   },
+  {
+  path: "/change-password",
+  name: "ChangePassword",
+  component: ChangePassword,
+},
+
   {
     path: "/student",
     name: "StudentLayout",

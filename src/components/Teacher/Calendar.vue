@@ -92,6 +92,7 @@ const calendarDays = computed(() => {
 
   const days = [];
 
+  // ... (ส่วนของ previous month เหมือนเดิม)
 
   const today = new Date();
   for (let i = 1; i <= daysInMonth; i++) {
@@ -101,6 +102,7 @@ const calendarDays = computed(() => {
       selectedDate.value &&
       fullDate.toDateString() === selectedDate.value.toDateString();
 
+    // 🔁 ใช้ toYMD แทน toISOString
     const key = toYMD(fullDate);
     const status = props.attendanceMap[key];
     const isPresent = status === "present";

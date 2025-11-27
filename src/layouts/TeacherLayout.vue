@@ -1,11 +1,11 @@
 <template>
     <div class="flex h-screen bg-gray-50">
-\        <Sidebar />
+        <SidebarTeacher />
 
-\        <div class="flex-1 flex flex-col overflow-hidden">
-\            <Navbar />
+       <div class="flex-1 flex flex-col overflow-hidden">
+            <Navbar />
 
-\            <main class="flex-1 overflow-y-auto p-4 md:p-6">
+          <main class="flex-1 overflow-y-auto p-4 md:p-6">
                 <router-view />
             </main>
         </div>
@@ -14,5 +14,5 @@
 
 <script setup>
 import Navbar from '../components/Navbar.vue';
-import Sidebar from '../components/Sidebar.vue';
+import SidebarTeacher from '../components/SidebarTeacher.vue';
 </script>
