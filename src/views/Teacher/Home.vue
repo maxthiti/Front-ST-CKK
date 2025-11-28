@@ -2,7 +2,9 @@
   <div class="max-w-7xl mx-auto">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="bg-white rounded-lg shadow p-4">
-        <h2 class="text-lg font-semibold text-gray-700 mb-4">บันทึกเวลาเข้า-ออก (ครู)</h2>
+        <h2 class="text-lg font-semibold text-gray-700 mb-4">
+          บันทึกเวลาเข้า-ออก (ครู)
+        </h2>
         <Calendar
           @date-selected="handleDateSelected"
           @month-changed="handleMonthChanged"
@@ -12,25 +14,30 @@
 
       <div class="bg-white rounded-lg shadow p-4">
         <h2 class="text-lg font-semibold text-gray-700 mb-4">
-          รายการเข้า-ออก  
-          <span v-if="selectedDate" class="text-sm font-normal text-gray-500">
+          รายการเข้า-ออก
+          <span
+            v-if="selectedDate"
+            class="text-sm font-normal text-gray-500"
+          >
             ({{ formatDate(selectedDate) }})
           </span>
-          <span v-else class="text-sm font-normal text-gray-500">
+          <span
+            v-else
+            class="text-sm font-normal text-gray-500"
+          >
             (เดือน {{ currentMonthName }})
           </span>
         </h2>
 
-       <div class="overflow-auto max-h-[70vh]">
-  <Table
-    :selectedDate="selectedDate"
-    :currentMonth="currentMonth"
-    :records="filteredRecords"
-    :loading="loading"
-    @show-detail="handleShowDetail"
-  />
-</div>
-
+        <div class="overflow-auto max-h-[70vh]">
+          <Table
+            :selectedDate="selectedDate"
+            :currentMonth="currentMonth"
+            :records="filteredRecords"
+            :loading="loading"
+            @show-detail="handleShowDetail"
+          />
+        </div>
       </div>
     </div>
 
@@ -49,7 +56,10 @@ import Table from "../../components/Teacher/Table.vue";
 import Detail from "../../components/Teacher/Detail.vue";
 import { getAttendance } from "../../api/Attendance";
 
-const teacherName = ref("นาย ธำรงค์ หน่อเรือง"); 
+// ภายหลังถ้าใช้ authStore / localStorage ก็มาแทนค่าตรงนี้ได้
+const teacherName = ref("นาย ธำรงค์ หน่อเรือง");
+
+// ------- helper: Date <-> string -------
 
 const toYMD = (d) => {
   const yyyy = d.getFullYear();
@@ -58,12 +68,20 @@ const toYMD = (d) => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
+const createLocalDate = (dateStr) => {
+  if (!dateStr) return null;
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d); // local time, ไม่เหลื่อมวัน
+};
+
+// ------- state -------
+
 const selectedDate = ref(null);
 const currentMonth = ref(new Date());
 const showDetail = ref(false);
 const selectedRecord = ref(null);
 
-const records = ref([]);
+const records = ref([]); // record แยกเป็นแถว ๆ
 const loading = ref(false);
 
 const FILE_BASE_URL = import.meta.env.VITE_APP_FILE_BASE_URL;
@@ -78,6 +96,8 @@ const buildUrl = (base, path) => {
   return root + cleanPath;
 };
 
+// ------- fetch attendance -------
+
 const fetchAttendance = async () => {
   const year = currentMonth.value.getFullYear();
   const month = currentMonth.value.getMonth();
@@ -91,8 +111,8 @@ const fetchAttendance = async () => {
     const apiRes = await getAttendance({
       start: toYMD(start),
       end: toYMD(end),
-      role: "teacher",              
-      name: teacherName.value,     
+      role: "teacher",
+      name: teacherName.value,
       page: 1,
       limit: 20,
     });
@@ -110,10 +130,11 @@ const fetchAttendance = async () => {
     let idCounter = 1;
 
     attendances.forEach((att) => {
-      const dateObj = new Date(att.date);
+      const dateObj = createLocalDate(att.date);
       const timeStamps = att.timeStamps || [];
-      if (!timeStamps.length) return;
+      if (!timeStamps.length || !dateObj) return;
 
+      // เรียง timestamp ก่อน
       const sorted = [...timeStamps].sort(
         (a, b) =>
           new Date(a.timestamp.replace(" ", "T")) -
@@ -123,16 +144,36 @@ const fetchAttendance = async () => {
       const getTime = (ts) =>
         ts && ts.timestamp ? ts.timestamp.slice(11, 16) : null;
 
-      sorted.forEach((ts) => {
+      sorted.forEach((ts, index) => {
+        const timeStr = getTime(ts); // "HH:MM"
+        const location = ts.location || "";
+
+        // ipc_2_out = เครื่องออก → ไม่ใช้ตัดสินสาย
+        const isOutDevice = location === "ipc_2_out";
+
+        // สแกนแรกของวัน และไม่ใช่เครื่องออก
+        const isFirstScanOfDay = index === 0 && !isOutDevice;
+
+        // คำนวณสาย:
+        //  - ต้องเป็นสแกนแรกของวัน
+        //  - เวลา > 08:00 หรือ 08:01 ขึ้นไป
+        let isLate = false;
+        if (isFirstScanOfDay && timeStr) {
+          const [h, m] = timeStr.split(":").map(Number);
+          if (h > 8) isLate = true;
+          else if (h === 8 && m > 0) isLate = true;
+        }
+
         recs.push({
           id: idCounter++,
           date: dateObj,
 
           originalPhoto: buildUrl(FILE_BASE_URL_FILES, teacher.picture),
           entryPhoto: buildUrl(FILE_BASE_URL, ts.image),
-          entryLocation: ts.location,
+          entryLocation: location,
 
-          checkTime: getTime(ts),   
+          checkTime: timeStr,
+          isLate, // 👈 ใช้ต่อใน attendanceMap / table
 
           status: "scan",
           raw: att,
@@ -153,15 +194,26 @@ const fetchAttendance = async () => {
 };
 
 onMounted(() => fetchAttendance());
-
 watch(currentMonth, () => {
   fetchAttendance();
 });
 
+// ------- computed for list & calendar -------
+
 const currentMonthName = computed(() => {
   const months = [
-    "มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน",
-    "กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม",
+    "มกราคม",
+    "กุมภาพันธ์",
+    "มีนาคม",
+    "เมษายน",
+    "พฤษภาคม",
+    "มิถุนายน",
+    "กรกฎาคม",
+    "สิงหาคม",
+    "กันยายน",
+    "ตุลาคม",
+    "พฤศจิกายน",
+    "ธันวาคม",
   ];
   return months[currentMonth.value.getMonth()];
 });
@@ -170,10 +222,13 @@ const filteredRecords = computed(() => {
   const year = currentMonth.value.getFullYear();
   const month = currentMonth.value.getMonth();
 
+  // records เฉพาะเดือนนี้
   let list = records.value.filter((r) => {
-    const d = new Date(r.date);
+    const d = r.date;
     return d.getFullYear() === year && d.getMonth() === month;
   });
+
+  // ถ้าเลือกวัน → filter ตามวัน
   if (selectedDate.value) {
     const d = new Date(selectedDate.value);
     const y = d.getFullYear();
@@ -181,7 +236,7 @@ const filteredRecords = computed(() => {
     const day = d.getDate();
 
     list = list.filter((r) => {
-      const rd = new Date(r.date);
+      const rd = r.date;
       return (
         rd.getFullYear() === y &&
         rd.getMonth() === m &&
@@ -190,9 +245,10 @@ const filteredRecords = computed(() => {
     });
   }
 
+  // เรียง วันที่ → เวลา
   return list.sort((a, b) => {
-    const da = new Date(a.date);
-    const db = new Date(b.date);
+    const da = a.date;
+    const db = b.date;
 
     if (da.getTime() === db.getTime()) {
       return (a.checkTime || "").localeCompare(b.checkTime || "");
@@ -201,39 +257,63 @@ const filteredRecords = computed(() => {
   });
 });
 
+// map สำหรับ Calendar: present / late / absent
 const attendanceMap = computed(() => {
   const map = {};
 
   const year = currentMonth.value.getFullYear();
   const month = currentMonth.value.getMonth();
 
+  // records เฉพาะเดือนนี้
   const monthRecords = records.value.filter((r) => {
-    const d = new Date(r.date);
+    const d = r.date;
     return d.getFullYear() === year && d.getMonth() === month;
   });
 
-  const presentSet = new Set(
-    monthRecords.map((r) => toYMD(new Date(r.date)))
-  );
+  // รวมข้อมูลต่อวัน
+  const dayInfo = {}; // { '2025-11-03': { hadScan: true, hadLate: false }, ... }
+
+  for (const r of monthRecords) {
+    const ymd = toYMD(r.date);
+    if (!dayInfo[ymd]) {
+      dayInfo[ymd] = { hadScan: false, hadLate: false };
+    }
+    dayInfo[ymd].hadScan = true;
+    if (r.isLate) {
+      dayInfo[ymd].hadLate = true;
+    }
+  }
 
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
   const lastDay = new Date(year, month + 1, 0).getDate();
 
   for (let d = 1; d <= lastDay; d++) {
     const dateObj = new Date(year, month, d);
+    dateObj.setHours(0, 0, 0, 0);
     const ymd = toYMD(dateObj);
 
-    if (
-      dateObj >
-      new Date(today.getFullYear(), today.getMonth(), today.getDate())
-    )
-      continue;
+    // ข้ามวันที่ยังไม่ถึง
+    if (dateObj > today) continue;
 
-    map[ymd] = presentSet.has(ymd) ? "present" : "absent";
+    const info = dayInfo[ymd];
+
+    if (!info) {
+      // ไม่มีการสแกนเลย
+      map[ymd] = "absent";
+    } else if (info.hadLate) {
+      // มีสแกน และสแกนแรกของวันสาย
+      map[ymd] = "late";
+    } else {
+      // มีสแกน แต่สแกนแรกไม่สาย
+      map[ymd] = "present";
+    }
   }
 
   return map;
 });
+
+// ------- handlers -------
 
 const handleDateSelected = (date) => {
   selectedDate.value = date;

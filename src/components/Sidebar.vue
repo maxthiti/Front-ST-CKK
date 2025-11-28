@@ -37,7 +37,6 @@
                             <span>หน้าแรก</span>
                             
                         </router-link>
-                       <li>
   <router-link
     to="/change-password"
     class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-600 transition-colors"
@@ -53,7 +52,6 @@
     </svg>
     <span>เปลี่ยนรหัสผ่าน</span>
   </router-link>
-</li>
 
                         
                     </li>

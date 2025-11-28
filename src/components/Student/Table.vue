@@ -29,10 +29,10 @@
         <tr>
           <th class="px-3 py-3 text-left font-semibold text-gray-700">วันที่</th>
           <th class="px-3 py-3 text-center font-semibold text-gray-700">รูปต้นฉบับ</th>
-          <th class="px-3 py-3 text-center font-semibold text-gray-700">รูปขาเข้า</th>
+          <th class="px-3 py-3 text-center font-semibold text-gray-700">รูปที่สแกน</th>
           <th class="px-3 py-3 text-center font-semibold text-gray-700">สถานที่</th>
           <th class="px-3 py-3 text-center font-semibold text-gray-700">เวลาสแกน</th>
-          <th class="px-3 py-3 text-center font-semibold text-gray-700">จัดการ</th>
+          <th class="px-3 py-3 text-center font-semibold text-gray-700">สถานะ</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-200">
@@ -60,7 +60,7 @@
             <img
               v-if="record.entryPhoto"
               :src="record.entryPhoto"
-              alt="รูปขาเข้า"
+              alt="รูปที่สแกน"
               class="w-12 h-12 rounded-full object-cover mx-auto cursor-pointer hover:opacity-80"
               @click="showImageModal(record.entryPhoto)"
             />
@@ -71,34 +71,47 @@
             {{ record.entryLocation || "-" }}
           </td>
 
+          <!-- เวลาสแกน: เขียวถ้าปกติ เหลืองถ้าสาย / ขาด/วันหยุด = "-" -->
           <td class="px-3 py-3 text-center">
-            <span v-if="record.checkTime" class="text-green-600 font-medium">
+            <span
+              v-if="record.checkTime"
+              class="font-medium"
+              :class="record.isLate ? 'text-yellow-500' : 'text-green-600'"
+            >
               {{ record.checkTime }}
             </span>
             <span v-else class="text-gray-400">-</span>
           </td>
 
+          <!-- สถานะ: ปกติ / สาย / ขาด / วันหยุดทำการ -->
           <td class="px-3 py-3 text-center">
-            <button
-              @click="showDetail(record)"
-              class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-colors"
+            <!-- วันหยุด -->
+            <span
+              v-if="record.dayStatus === 'holiday'"
+              class="font-semibold text-blue-500"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                />
-              </svg>
-              ดูรายละเอียด
-            </button>
+              วันหยุดทำการ
+            </span>
+
+            <!-- ขาด -->
+            <span
+              v-else-if="record.dayStatus === 'absent'"
+              class="font-semibold text-red-500"
+            >
+              ขาด
+            </span>
+
+            <!-- มีการสแกน -->
+            <span
+              v-else-if="record.checkTime"
+              class="font-semibold"
+              :class="record.isLate ? 'text-yellow-500' : 'text-green-600'"
+            >
+              {{ record.isLate ? 'สาย' : 'ปกติ' }}
+            </span>
+
+            <!-- กันพลาด -->
+            <span v-else class="text-gray-400">-</span>
           </td>
         </tr>
       </tbody>
@@ -145,41 +158,85 @@ const emit = defineEmits(["show-detail"]);
 
 const imageModalUrl = ref(null);
 
+// ✅ list รายวัน + เติม "ขาด"/"วันหยุดทำการ"
+// และถ้า "ยังไม่ได้เลือกวัน" จะเรียงจากวันล่าสุด → วันเก่าสุด
+// ❗ วันที่ในอนาคตจะไม่สร้าง row (ไม่แสดงอะไรเลย)
 const filteredRecords = computed(() => {
-  let list = [];
+  const year = props.currentMonth.getFullYear();
+  const month = props.currentMonth.getMonth();
 
-  if (props.selectedDate) {
-    const d = new Date(props.selectedDate);
-    const y = d.getFullYear();
-    const m = d.getMonth();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // map วันที่ -> records ของวันนั้น
+  const byDay = new Map();
+  for (const r of props.records) {
+    const d = new Date(r.date);
+    d.setHours(0, 0, 0, 0);
+    if (d.getFullYear() !== year || d.getMonth() !== month) continue;
+    if (d > today) continue; // กันกรณี records ของอนาคต (ถ้ามี)
     const day = d.getDate();
-
-    list = props.records.filter((r) => {
-      const rd = new Date(r.date);
-      return (
-        rd.getFullYear() === y &&
-        rd.getMonth() === m &&
-        rd.getDate() === day
-      );
-    });
-  } else {
-    const year = props.currentMonth.getFullYear();
-    const month = props.currentMonth.getMonth();
-    list = props.records.filter((r) => {
-      const rd = new Date(r.date);
-      return rd.getFullYear() === year && rd.getMonth() === month;
-    });
+    if (!byDay.has(day)) byDay.set(day, []);
+    byDay.get(day).push(r);
   }
 
-  // เรียงตามวันที่ + เวลาแสกน
-  return list.sort((a, b) => {
-    const da = new Date(a.date);
-    const db = new Date(b.date);
-    if (da.getTime() === db.getTime()) {
-      return (a.checkTime || "").localeCompare(b.checkTime || "");
+  // กำหนดช่วงวันในเดือนนี้
+  let startDay = 1;
+  let endDay = new Date(year, month + 1, 0).getDate();
+
+  // ถ้าเลือกวันที่ → แสดงเฉพาะวันนั้น
+  if (props.selectedDate) {
+    const d = new Date(props.selectedDate);
+    d.setHours(0, 0, 0, 0);
+    if (d.getFullYear() === year && d.getMonth() === month) {
+      // ถ้าเลือกวันในอนาคต → จะไม่มี row เลย (เพราะด้านล่างเราข้าม > today)
+      startDay = endDay = d.getDate();
     }
-    return da - db;
-  });
+  }
+
+  const result = [];
+
+  // loop ถอยหลัง เพื่อให้วันล่าสุดอยู่บนสุดเมื่อ "ไม่ได้เลือกวัน"
+  for (let day = endDay; day >= startDay; day--) {
+    const dateObj = new Date(year, month, day);
+    dateObj.setHours(0, 0, 0, 0);
+
+    // ❗ ข้ามทุกวันที่มากกว่าวันนี้
+    if (dateObj > today) continue;
+
+    const dayRecords = byDay.get(day) || [];
+
+    if (dayRecords.length > 0) {
+      // มีการสแกนในวันนี้ → ใช้ records เดิม แต่เรียงตามเวลา (เช้า→เย็น)
+      const sorted = [...dayRecords].sort((a, b) =>
+        (a.checkTime || "").localeCompare(b.checkTime || "")
+      );
+
+      sorted.forEach((r) => {
+        result.push({
+          ...r,
+          dayStatus: "present", // มีการมา
+        });
+      });
+    } else {
+      // ไม่มีการสแกน → ขาด หรือ วันหยุดทำการ (เสาร์/อาทิตย์)
+      const dayOfWeek = dateObj.getDay(); // 0 = อาทิตย์, 6 = เสาร์
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+      result.push({
+        id: `empty-${year}-${month + 1}-${day}`,
+        date: dateObj,
+        originalPhoto: null,
+        entryPhoto: null,
+        entryLocation: null,
+        checkTime: null,
+        isLate: false,
+        dayStatus: isWeekend ? "holiday" : "absent",
+      });
+    }
+  }
+
+  return result;
 });
 
 const formatDate = (date) => {

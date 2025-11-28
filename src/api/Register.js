@@ -6,7 +6,7 @@ export async function registerUser(payload) {
   const formData = new URLSearchParams();
 
   formData.append('role', payload.role);
-  formData.append('pre_name', payload.pre_name);
+  formData.append('pre_name', payload.pre_name === 'custom' ? payload.custom_pre_name : payload.pre_name);
   formData.append('first_name', payload.first_name);
   formData.append('last_name', payload.last_name);
   formData.append('userid', payload.userid);

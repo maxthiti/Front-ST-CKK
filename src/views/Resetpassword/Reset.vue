@@ -6,48 +6,122 @@
       </h1>
 
       <form @submit.prevent="handleSubmit" class="space-y-5">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            รหัสผ่านเดิม
-          </label>
-          <input
-            v-model="form.old_password"
-            type="password"
-            required
-            class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="กรอกรหัสผ่านเดิม"
-             @input="form.old_password = form.old_password.replace(/[^A-Za-z0-9]/g, '')"
-          />
-        </div>
+      <div>
+  <label class="block text-sm font-medium text-gray-700 mb-2">
+    รหัสผ่านเดิม
+  </label>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            รหัสผ่านใหม่
-          </label>
-          <input
-            v-model="form.new_password"
-            type="password"
-            required
-            class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="กรอกรหัสผ่านใหม่"
-             @input="form.new_password = form.new_password.replace(/[^A-Za-z0-9]/g, '')"
-          />
-        </div>
+  <div class="relative">
+    <input
+      :type="showOldPassword ? 'text' : 'password'"
+      v-model="form.old_password"
+      required
+      class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
+      placeholder="กรอกรหัสผ่านเดิม"
+      @input="form.old_password = form.old_password.replace(/[^A-Za-z0-9]/g, '').slice(0,20)"
+    />
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            ยืนยันรหัสผ่านใหม่
-          </label>
-          <input
-            v-model="form.confirm_password"
-            type="password"
-            required
-            class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="กรอกรหัสผ่านใหม่อีกครั้ง"
-              @input="form.confirm_password = form.confirm_password.replace(/[^A-Za-z0-9]/g, '')"
+    <button
+      type="button"
+      @click="showOldPassword = !showOldPassword"
+      class="absolute inset-y-0 right-3 flex items-center text-gray-500"
+    >
+      <svg v-if="!showOldPassword" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+      </svg>
 
-          />
-        </div>
+      <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.993 9.993 0 012.212-3.592M9.88 9.88A3 3 0 0114.12 14.12M6.1 6.1l11.8 11.8"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+
+       <div>
+  <label class="block text-sm font-medium text-gray-700 mb-2">
+    รหัสผ่านใหม่
+  </label>
+
+  <div class="relative">
+    <input
+      :type="showNewPassword ? 'text' : 'password'"
+      v-model="form.new_password"
+      required
+      class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
+      placeholder="กรอกรหัสผ่านใหม่"
+@input="form.new_password = form.new_password.replace(/[^A-Za-z0-9]/g, '').slice(0,20)"
+
+    />
+
+    <button
+      type="button"
+      @click="showNewPassword = !showNewPassword"
+      class="absolute inset-y-0 right-3 flex items-center text-gray-500"
+      
+    >
+      <svg v-if="!showNewPassword" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+      </svg>
+
+      <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.993 9.993 0 012.212-3.592M9.88 9.88A3 3 0 0114.12 14.12M6.1 6.1l11.8 11.8"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+
+       <div>
+  <label class="block text-sm font-medium text-gray-700 mb-2">
+    ยืนยันรหัสผ่านใหม่
+  </label>
+
+  <div class="relative">
+    <input
+      :type="showConfirmPassword ? 'text' : 'password'"
+      v-model="form.confirm_password"
+      required
+      class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
+      placeholder="กรอกรหัสผ่านใหม่อีกครั้ง"
+    @input="form.confirm_password = form.confirm_password.replace(/[^A-Za-z0-9]/g, '').slice(0,20)"
+
+    />
+
+    <button
+      type="button"
+      @click="showConfirmPassword = !showConfirmPassword"
+      class="absolute inset-y-0 right-3 flex items-center text-gray-500"
+    >
+      <svg v-if="!showConfirmPassword" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+      </svg>
+
+      <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.993 9.993 0 012.212-3.592M9.88 9.88A3 3 0 0114.12 14.12M6.1 6.1l11.8 11.8"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
 
         <div
           v-if="errorMessage"
@@ -90,6 +164,11 @@ import { resetPassword } from "../../api/Resetpassword";
 import { useAuthStore } from "../../stores/auth";
 import { useRouter } from "vue-router";
 
+const showOldPassword = ref(false);
+const showNewPassword = ref(false);
+const showConfirmPassword = ref(false);
+
+
 const form = ref({
   old_password: "",
   new_password: "",
@@ -109,18 +188,25 @@ const handleSubmit = async () => {
   errorMessage.value = "";
   successMessage.value = "";
 
+  const passwordRegex = /^[A-Za-z0-9]+$/;
+
+  // เช็ครหัสผ่านทุกช่องว่ามีแค่ตัวเลข + อังกฤษ
+  if (
+    !passwordRegex.test(form.value.old_password) ||
+    !passwordRegex.test(form.value.new_password) ||
+    !passwordRegex.test(form.value.confirm_password)
+  ) {
+    errorMessage.value = "รหัสผ่านต้องเป็นตัวเลขหรือภาษาอังกฤษเท่านั้น";
+    return;
+  }
+
+  // เช็คว่ารหัสผ่านใหม่กับยืนยันตรงกันไหม
   if (form.value.new_password !== form.value.confirm_password) {
     errorMessage.value = "รหัสผ่านใหม่ไม่ตรงกัน";
     return;
   }
 
-  const passwordRegex = /^[A-Za-z0-9]+$/;
-
-if (!passwordRegex.test(form.value.new_password)) {
-  errorMessage.value = "รหัสผ่านต้องเป็นตัวเลขหรือภาษาอังกฤษเท่านั้น";
-  return;
-}
-
+  // เช็คความยาว
   if (form.value.new_password.length < 4) {
     errorMessage.value = "รหัสผ่านใหม่ควรมีอย่างน้อย 4 ตัว";
     return;
@@ -140,29 +226,31 @@ if (!passwordRegex.test(form.value.new_password)) {
       authStore.logout?.();
       router.push("/");
     }, 1500);
- } catch (err) {
-  console.error(err);
+  } catch (err) {
+    console.error(err);
 
-  const rawError =
-    err.response?.data?.error ||
-    err.response?.data?.message ||
-    err.message ||
-    "";
+    const rawError =
+      err.response?.data?.error ||
+      err.response?.data?.message ||
+      err.message ||
+      "";
 
-  // 👇 แมปข้อความจาก backend เป็นภาษาไทย
-  if (typeof rawError === "string" && rawError.toLowerCase().includes("wrong old password")) {
-    errorMessage.value = "รหัสผ่านเดิมไม่ถูกต้อง";
-  } else if (err.response?.data?.error) {
-    errorMessage.value = err.response.data.error;
-  } else if (err.message) {
-    errorMessage.value = err.message;
-  } else {
-    errorMessage.value = "เปลี่ยนรหัสผ่านไม่สำเร็จ กรุณาลองใหม่อีกครั้ง";
-  }
-}
-  finally {
+    if (
+      typeof rawError === "string" &&
+      rawError.toLowerCase().includes("wrong old password")
+    ) {
+      errorMessage.value = "รหัสผ่านเดิมไม่ถูกต้อง";
+    } else if (err.response?.data?.error) {
+      errorMessage.value = err.response.data.error;
+    } else if (err.message) {
+      errorMessage.value = err.message;
+    } else {
+      errorMessage.value = "เปลี่ยนรหัสผ่านไม่สำเร็จ กรุณาลองใหม่อีกครั้ง";
+    }
+  } finally {
     loading.value = false;
   }
 };
 
+ 
 </script>

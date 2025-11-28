@@ -1,4 +1,3 @@
-// src/api/ResetPassword.js
 import axios from "axios";
 import qs from "qs";
 import { useAuthStore } from "../stores/auth";

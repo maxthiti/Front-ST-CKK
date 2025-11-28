@@ -60,12 +60,12 @@
           </div>
 
           <div>
-            <p class="text-sm font-medium text-gray-700 mb-2">รูปขาเข้า</p>
+            <p class="text-sm font-medium text-gray-700 mb-2">รูปที่สแกน</p>
             <div class="border-2 border-gray-200 rounded-lg overflow-hidden">
               <img
                 v-if="record.entryPhoto"
                 :src="record.entryPhoto"
-                alt="รูปขาเข้า"
+                alt="รูปที่สแกน"
                 class="w-full h-48 object-cover cursor-pointer hover:opacity-90"
                 @click="showImageModal(record.entryPhoto)"
               />
